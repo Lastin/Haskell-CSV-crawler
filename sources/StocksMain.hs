@@ -18,17 +18,17 @@ main = do args <- getArgs
              ["create"] -> createDB	
              ["saved"] -> printStocks	
              ["unfold"] -> unfoldDB
-             ["show", url] ->
-             	do urlText <- downloadURL url
-             	   print urlText
-             ["crawl", url] ->
-             	do urlText <- downloadURL url
-             	   let urls = parseURLs urlText
-             	   storeURLs urls
+             ["show", company] ->
+             	do csv <- downloadURL company
+             	   print csv
+             ["get", company] ->
+             	do csv <- downloadURL company
+             	   let rows = parseCSV csv
+             	   storeURLs rows
              _ -> syntaxError
 
 syntaxError = putStrLn 
-  "Usage: Crawler command [args]\n\
+  "Usage: StocksMain command [args]\n\
   \\n\
   \create           Create database urls.db\n\
   \show url         Shows contents of given URL\n\

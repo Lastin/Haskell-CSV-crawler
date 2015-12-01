@@ -1,5 +1,5 @@
 -- |Module that performs http requests and parses returned csv.
-module CSVdownloader where
+module CSVDownloader where
 
 import Network.HTTP
 import Network.HTTP.Conduit
@@ -12,28 +12,20 @@ import qualified Data.ByteString.Lazy as L
 import Control.Exception
 import Language.Haskell.TH.Ppr
 
-type COMPANY_ID = String
+type Company = String
 type HTML = String
 
-data Row = Row { date      :: Date,
-					  open      :: Double,
-				     high      :: Double,
-				     low       :: Double,
-				     close     :: Double,
-				     volume    :: Double,
-				     adj_close :: Double
-				} deriving (Show)
 
---download link, should be followed by company id
+-- Download link, should be followed by company name
 finances_url = "http://finance.yahoo.com/q/hp?s="
---abc - starting day month year
+-- abc - starting day month year
 csv_url = ["http://real-chart.finance.yahoo.com/table.csv?s=%", "&a=00&b=1&c=1970&ignore=.csv"]
 
--- |This function will download a given url and return its content as a String
+-- |This function will download a CSV for a given company name and return its content as a String
 -- This uses simpleHTTP which is not as fast as simpleHttp
-downloadURL :: COMPANY              -- String containing the URL to be downloaded
+downloadCSV :: Company              -- String containing the name of company of which CSV is to be downloaded
             -> IO String
-downloadURL url =
+downloadCSV company =
     do resp <- simpleHTTP request
        case resp of
          Left x -> return $ "Error connecting: " ++ show x

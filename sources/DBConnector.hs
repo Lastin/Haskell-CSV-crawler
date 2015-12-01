@@ -1,18 +1,19 @@
 -- |Module containing functions that operate on the database csvs.db
-module DBconnector where
+module DBConnector where
 
-import CSVdownloader
+import CSVParser
+import CSVDownloader
 import Database.HDBC
 import Database.HDBC.Sqlite3
 
 
--- |Method to create the database csvs.db
+-- |Method to create the database stocks.db
 -- It uses connectSqlite3 from Database.HDBC.Sqlite3
 createDB :: IO ()
-createDB = do conn <- connectSqlite3 "csvs.db"
-              run conn "CREATE TABLE companies IF NOT EXIST (company_id TEXT PRIMARY KEY, company_name TEXT)"
-				  run conn "CREATE TABLE csvs IF NOT EXIST (\
-									company_id TEXT,\
+createDB = do conn <- connectSqlite3 "stocks.db"
+              run conn "CREATE TABLE companies IF NOT EXIST (company_id INTEGER PRIMARY KEY, company_name TEXT UNIQUE NOT NULL)"
+				  run conn "CREATE TABLE stocks IF NOT EXIST (\
+									company_id INTEGER,\
 									date DATETIME,\
 									open DOUBLE,\
 									high DOUBLE,\
@@ -20,17 +21,22 @@ createDB = do conn <- connectSqlite3 "csvs.db"
 									close DOUBLE,\
 									volume DOUBLE,\
 									adj_close DOUBLE,\
-									FOREIGN KEY() REFERENCES companies(company_id))" []
+									FOREIGN KEY(company_id) REFERENCES companies(company_id))" []
               commit conn
 
 -- |Method to store the data from csv file to the database (table csvs)
-storeCSVs :: [Row] -- ^ List of rows to be stored on the database
+storeRows :: [Row] -- ^ List of rows to be stored on the database
           -> IO ()
-storeCSVs [] = return ()
-storeCSVs xs = 
+storeRows [] = return ()
+storeRows xs = 
      do conn <- connectSqlite3 "csvs.db"
-        stmt <- prepare conn "INSERT IGNORE INTO csvs (company, date, open, high, low, close, volume, adj_close) VALUES (????????)"
-        executeMany stmt (map (\x -> [toSql x]) xs)
+		  stmtCompanies <- prepare conn "INSERT OR IGNORE INTO companies (company_name) VALUES (?)"
+		  executeMany stmtCompanies (map (\x -> [toSql (company x)]) xs)
+        stmtStocks <- prepare conn "INSERT OR IGNORE INTO csvs (company_id, date, open, high, low, close, volume, adj_close)\
+												SELECT company_id,?,?,?,?,?,?,?\
+												FROM companies WHERE company_name = ?"
+--TODO map custom data into statement
+		  executeMany stmtStocks (map (\x -> [toSql x]) xs)
         commit conn        
 
 -- |Method to display all the URLs on the database. It uses getURLs.
