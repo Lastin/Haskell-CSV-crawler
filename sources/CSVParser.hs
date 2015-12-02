@@ -2,18 +2,17 @@ module CSVParser where
 import Data.List.Split
 import Data.Time
 
-data Row = Row { company_name	:: String,
-					  date         :: Day,
+data Row = Row { date         :: Day,
 				     high      	:: Double,
 				     low       	:: Double
 			  } deriving (Show)
 
 stringToDate :: String -> Day
-stringToDate s = fromGregorian (t!!0) (t!!1) (t!!2)
-					  where t = splitOn "-" s
+stringToDate s = fromGregorian (toInteger $ t!!0) (t!!1) (t!!2)
+					  where t = map (read :: String -> Int) $ splitOn "-" s
 
-createRow :: String -> [String] -> Row
-createRow c s = Row {company_name = c, date = s!!0, high = read (s!!2), low = read (!!3)}
+createRow :: [String] -> Row
+createRow s = Row {date = (stringToDate $ s!!0), high = read (s!!2), low = read (s!!3)}
 
-csvToRows :: String -> String -> [Row]
-csvToRows c csv = map ((createRow c) . (splitOn ",")) $ tail . lines csv
+csvToRows :: String -> [Row]
+csvToRows csv = map (createRow . splitOn ",") $ tail $ lines csv
