@@ -14,7 +14,7 @@ downloadCSV company =
       print request
       resp <- simpleHTTP request
       case resp of
-         Left x -> return $ "Error connecting: " ++ show x   --x -> return $ "Error connecting: " ++ show x
+         Left x -> return $ "Error connecting: " ++ show x
          Right r ->
             case rspCode r of
                (2,_,_) -> return $ rspBody r

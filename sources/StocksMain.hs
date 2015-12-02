@@ -11,7 +11,7 @@ main = do args <- getArgs
                do csv <- downloadCSV company
                   let rows = csvToRows csv
                   storeRows company rows
-             --["saved"] -> printStocks
+             ["highest"] -> printHighest
              _ -> syntaxError
 
 syntaxError = putStrLn 
@@ -19,4 +19,5 @@ syntaxError = putStrLn
   \\n\
   \create           Create database stocks.db\n\
   \drop             Drop tables in database stocks.db\n\
-  \save company     Saves csv into the database\n"
+  \save company     Saves csv into the database\n\
+  \highest          Prints highest 'high' for each company"

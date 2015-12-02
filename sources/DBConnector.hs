@@ -28,7 +28,15 @@ storeRows c rows =
       execute stmt [toSql c]
       result <- fetchRow stmt
       stmtStocks <- prepare conn $ "INSERT OR IGNORE INTO stocks (company_id, date, high, low) VALUES (?,?,?,?)"
-      --TODO: execute stmtStocks
       case result of
          Just id -> executeMany stmtStocks $ map (id ++) (map (rowToSql) rows)
+      commit conn
+
+printHighest :: IO()
+printHighest =
+   do conn <- connectSqlite3 "stocks.db"
+      stmt <- prepare conn "SELECT company_name, max(high) FROM stocks JOIN companies GROUP BY company_name"
+      execute stmt []
+      result <- sFetchAllRows stmt
+      print result
       commit conn
