@@ -1,11 +1,15 @@
 module CSVParser where
 import Data.List.Split
 import Data.Time
+import Database.HDBC.SqlValue
 
 data Row = Row { date         :: Day,
 				     high      	:: Double,
 				     low       	:: Double
 			  } deriving (Show)
+
+rowToSql :: Row -> [SqlValue]
+rowToSql (Row d h l) = [toSql d, toSql h, toSql l]
 
 stringToDate :: String -> Day
 stringToDate s = fromGregorian (toInteger $ t!!0) (t!!1) (t!!2)

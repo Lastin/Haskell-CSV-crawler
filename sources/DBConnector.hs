@@ -14,7 +14,7 @@ createDB =
 dropTables :: IO ()
 dropTables =
    do conn <- connectSqlite3 "stocks.db"
-      run conn "DROP TABLE companies; DROP TABLE stocks" []
+      run conn "DROP TABLE IF EXISTS stocks; DROP TABLE IF EXISTS companies" []
       commit conn
 
 
@@ -24,8 +24,11 @@ storeRows c rows =
    do conn <- connectSqlite3 "stocks.db"
       stmtCompany <- prepare conn "INSERT OR IGNORE INTO companies (company_name) VALUES (?)"
       execute stmtCompany [toSql c]
-      stmtStocks <- prepare conn $ "INSERT OR IGNORE INTO csvs (company_id, date, high, low)\
-                                    \SELECT company_id,?,?,? FROM companies WHERE company_name = " ++ c
+      stmt <- prepare conn "SELECT company_id FROM companies WHERE company_name = ?"
+      execute stmt [toSql c]
+      result <- fetchRow stmt
+      stmtStocks <- prepare conn $ "INSERT OR IGNORE INTO stocks (company_id, date, high, low) VALUES (?,?,?,?)"
       --TODO: execute stmtStocks
-      --executeMany stmtStocks 
+      case result of
+         Just id -> executeMany stmtStocks $ map (id ++) (map (rowToSql) rows)
       commit conn

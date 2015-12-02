@@ -20,4 +20,4 @@ downloadCSV company =
                (2,_,_) -> return $ rspBody r
                _ -> return $ show r
    where request = Request {rqURI = uri, rqMethod = GET, rqHeaders = [], rqBody = ""}
-         uri = fromJust $ parseURI (csv_url ++ company)
+         uri = fromJust $ parseURI (csv_url ++ (urlEncode company))
