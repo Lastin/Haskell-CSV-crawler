@@ -7,12 +7,16 @@ main = do args <- getArgs
           case args of
              ["create"] -> createDB
              ["drop"] -> dropTables
-             ["save", company] ->
-               do csv <- downloadCSV company
-                  let rows = csvToRows csv
-                  storeRows company rows
+             ["save", company] -> do saveCompany company
+             ["update"] -> do companies <- getCompanies
+                              mapM_ saveCompany companies
              ["highest"] -> printHighest
              _ -> syntaxError
+
+saveCompany :: String -> IO ()
+saveCompany company = do csv <- downloadCSV company
+                         let rows = csvToRows csv
+                         storeRows company rows
 
 syntaxError = putStrLn 
   "Usage: StocksMain command [args]\n\

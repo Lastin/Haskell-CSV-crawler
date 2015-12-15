@@ -1,5 +1,6 @@
 module DBConnector where
 
+import Data.Maybe
 import CSVParser
 import Database.HDBC
 import Database.HDBC.Sqlite3
@@ -8,7 +9,7 @@ createDB :: IO ()
 createDB =
    do conn <- connectSqlite3 "stocks.db"
       run conn "CREATE TABLE IF NOT EXISTS companies (company_id INTEGER PRIMARY KEY, company_name TEXT UNIQUE NOT NULL)" []
-      run conn "CREATE TABLE IF NOT EXISTS stocks (company_id INTEGER, date DATETIME, high DOUBLE, low DOUBLE, FOREIGN KEY(company_id) REFERENCES companies(company_id))" []
+      run conn "CREATE TABLE IF NOT EXISTS stocks (company_id INTEGER, date DATETIME UNIQUE, high DOUBLE, low DOUBLE, FOREIGN KEY(company_id) REFERENCES companies(company_id))" []
       commit conn
 
 dropTables :: IO ()
@@ -18,7 +19,7 @@ dropTables =
       commit conn
 
 
-storeRows :: String -> [Row] -> IO ()
+storeRows :: String -> [Row] -> IO()
 storeRows _ [] = return ()
 storeRows c rows = 
    do conn <- connectSqlite3 "stocks.db"
@@ -39,4 +40,12 @@ printHighest =
       execute stmt []
       result <- sFetchAllRows stmt
       print result
-      commit conn
+
+getCompanies :: IO [String]
+getCompanies =
+   do conn <- connectSqlite3 "stocks.db"
+      stmt <- prepare conn "SELECT company_name FROM companies"
+      execute stmt []
+      result <- sFetchAllRows stmt
+      return $ map (fromJust . head) result
+      
