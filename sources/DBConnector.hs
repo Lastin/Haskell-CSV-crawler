@@ -4,6 +4,17 @@ import Data.Maybe
 import CSVParser
 import Database.HDBC
 import Database.HDBC.Sqlite3
+import qualified Database.HDBC.MySQL as My
+
+-- |Returns connection to university MySQL database
+connectToMySql :: IO My.Connection
+connectToMySql = 
+   do My.connectMySQL My.defaultMySQLConnectInfo {
+         My.mysqlHost     = "dbprojects.eecs.qmul.ac.uk",
+         My.mysqlUser     = "mm306",
+         My.mysqlPassword = "fNZOoc8FMovzo",
+         My.mysqlDatabase = ""
+   }
 
 -- |Creates tables in the stocks.db database
 createDB :: IO ()
@@ -12,6 +23,7 @@ createDB =
       run conn "CREATE TABLE IF NOT EXISTS companies (company_id INTEGER PRIMARY KEY, company_name TEXT UNIQUE NOT NULL)" []
       run conn "CREATE TABLE IF NOT EXISTS stocks (company_id INTEGER, date DATETIME UNIQUE, high DOUBLE, low DOUBLE, FOREIGN KEY(company_id) REFERENCES companies(company_id))" []
       commit conn
+
 -- |Drops the tables stocks and companies from stocks.db database
 dropTables :: IO ()
 dropTables =
