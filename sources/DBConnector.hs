@@ -23,29 +23,30 @@ storeRows :: String -> [Row] -> IO()
 storeRows _ [] = return ()
 storeRows c rows = 
    do conn <- connectSqlite3 "stocks.db"
-      stmtCompany <- prepare conn "INSERT OR IGNORE INTO companies (company_name) VALUES (?)"
-      execute stmtCompany [toSql c]
+      quickQuery' conn "INSERT OR IGNORE INTO companies (company_name) VALUES (?)" [toSql c]
       stmt <- prepare conn "SELECT company_id FROM companies WHERE company_name = ?"
       execute stmt [toSql c]
       result <- fetchRow stmt
-      stmtStocks <- prepare conn $ "INSERT OR IGNORE INTO stocks (company_id, date, high, low) VALUES (?,?,?,?)"
       case result of
-         Just id -> executeMany stmtStocks $ map (id ++) (map (rowToSql) rows)
+         Just id -> do stmtStocks <- prepare conn $ "INSERT OR IGNORE INTO stocks (company_id, date, high, low) VALUES (?,?,?,?)"
+                       executeMany stmtStocks $ map (id ++) (map (rowToSql) rows)
       commit conn
 
-printHighest :: IO()
+printHighest :: IO ()
 printHighest =
    do conn <- connectSqlite3 "stocks.db"
       stmt <- prepare conn "SELECT company_name, max(high) FROM stocks JOIN companies GROUP BY company_name"
       execute stmt []
-      result <- sFetchAllRows stmt
-      print result
+      result <- fetchAllRows stmt
+      putStrLn "     Company     |     Highest    "
+      putStrLn "----------------------------------"
+      mapM_ (putStrLn . formatSqlRow) result
+
+--printLowest :: IO()
+--printLowest
 
 getCompanies :: IO [String]
 getCompanies =
    do conn <- connectSqlite3 "stocks.db"
-      stmt <- prepare conn "SELECT company_name FROM companies"
-      execute stmt []
-      result <- sFetchAllRows stmt
-      return $ map (fromJust . head) result
-      
+      result <- quickQuery' conn "SELECT company_name FROM companies" []
+      return $ map (fromSql . head) result

@@ -11,6 +11,10 @@ data Row = Row { date :: Day,
 rowToSql :: Row -> [SqlValue]
 rowToSql (Row d h l) = [toSql d, toSql h, toSql l]
 
+formatSqlRow :: [SqlValue] -> String
+formatSqlRow c = a!!0 ++ (replicate (17 - (length $ a!!0)) ' ') ++ "|" ++ a!!1 ++ "\n----------------------------------"
+                 where a = map (fromSql :: SqlValue -> String) c
+
 stringToDate :: String -> Day
 stringToDate s = fromGregorian (toInteger $ t!!0) (t!!1) (t!!2)
                  where t = map (read :: String -> Int) $ splitOn "-" s

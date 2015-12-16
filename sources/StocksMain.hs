@@ -23,5 +23,6 @@ syntaxError = putStrLn
   \\n\
   \create           Create database stocks.db\n\
   \drop             Drop tables in database stocks.db\n\
+  \update           Updates the stocks for existing companies\n\
   \save company     Saves csv into the database\n\
   \highest          Prints highest 'high' for each company"
