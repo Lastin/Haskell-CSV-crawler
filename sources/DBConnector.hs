@@ -5,20 +5,21 @@ import CSVParser
 import Database.HDBC
 import Database.HDBC.Sqlite3
 
+-- |Creates tables in the stocks.db database
 createDB :: IO ()
 createDB =
    do conn <- connectSqlite3 "stocks.db"
       run conn "CREATE TABLE IF NOT EXISTS companies (company_id INTEGER PRIMARY KEY, company_name TEXT UNIQUE NOT NULL)" []
       run conn "CREATE TABLE IF NOT EXISTS stocks (company_id INTEGER, date DATETIME UNIQUE, high DOUBLE, low DOUBLE, FOREIGN KEY(company_id) REFERENCES companies(company_id))" []
       commit conn
-
+-- |Drops the tables stocks and companies from stocks.db database
 dropTables :: IO ()
 dropTables =
    do conn <- connectSqlite3 "stocks.db"
       run conn "DROP TABLE IF EXISTS stocks; DROP TABLE IF EXISTS companies" []
       commit conn
 
-
+-- |Takes company name and rows and inserts company and stock prices into database, ignoring existing values
 storeRows :: String -> [Row] -> IO()
 storeRows _ [] = return ()
 storeRows c rows = 
@@ -32,11 +33,13 @@ storeRows c rows =
                        executeMany stmtStocks $ map (id ++) (map (rowToSql) rows)
       commit conn
 
+-- |Function for printing header, used by [@printHighest@] and [@printLowest@] functions
 printHeader :: IO ()
 printHeader =
    do putStrLn "     Company     |     Highest    "
       putStrLn "----------------------------------"
 
+-- |Queries and prints the maximum value of column high for each company
 printHighest :: IO ()
 printHighest =
    do conn <- connectSqlite3 "stocks.db"
@@ -46,6 +49,7 @@ printHighest =
       printHeader
       mapM_ (putStrLn . formatSqlRow) result
 
+-- |Queries and prints the minimum value of column low for each company
 printLowest :: IO()
 printLowest =
       do conn <- connectSqlite3 "stocks.db"
@@ -55,6 +59,7 @@ printLowest =
          printHeader
          mapM_ (putStrLn . formatSqlRow) result
 
+-- |Returns names of companies from the database
 getCompanies :: IO [String]
 getCompanies =
    do conn <- connectSqlite3 "stocks.db"
