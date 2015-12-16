@@ -11,6 +11,7 @@ main = do args <- getArgs
              ["update"] -> do companies <- getCompanies
                               mapM_ saveCompany companies
              ["highest"] -> printHighest
+             ["lowest"] -> printLowest
              _ -> syntaxError
 
 saveCompany :: String -> IO ()
@@ -25,4 +26,5 @@ syntaxError = putStrLn
   \drop             Drop tables in database stocks.db\n\
   \update           Updates the stocks for existing companies\n\
   \save company     Saves csv into the database\n\
-  \highest          Prints highest 'high' for each company"
+  \highest          Prints highest stock price of each company\n\
+  \lowest           Prints lowest stock price of each company\n"

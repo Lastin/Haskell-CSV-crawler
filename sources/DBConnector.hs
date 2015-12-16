@@ -32,18 +32,28 @@ storeRows c rows =
                        executeMany stmtStocks $ map (id ++) (map (rowToSql) rows)
       commit conn
 
+printHeader :: IO ()
+printHeader =
+   do putStrLn "     Company     |     Highest    "
+      putStrLn "----------------------------------"
+
 printHighest :: IO ()
 printHighest =
    do conn <- connectSqlite3 "stocks.db"
-      stmt <- prepare conn "SELECT company_name, max(high) FROM stocks JOIN companies GROUP BY company_name"
+      stmt <- prepare conn "SELECT company_name, max(high) FROM stocks JOIN companies ON stocks.company_id = companies.company_id GROUP BY company_name ORDER BY high DESC"
       execute stmt []
       result <- fetchAllRows stmt
-      putStrLn "     Company     |     Highest    "
-      putStrLn "----------------------------------"
+      printHeader
       mapM_ (putStrLn . formatSqlRow) result
 
---printLowest :: IO()
---printLowest
+printLowest :: IO()
+printLowest =
+      do conn <- connectSqlite3 "stocks.db"
+         stmt <- prepare conn "SELECT company_name, min(low) FROM stocks JOIN companies ON stocks.company_id = companies.company_id GROUP BY company_name ORDER BY low ASC"
+         execute stmt []
+         result <- fetchAllRows stmt
+         printHeader
+         mapM_ (putStrLn . formatSqlRow) result
 
 getCompanies :: IO [String]
 getCompanies =
