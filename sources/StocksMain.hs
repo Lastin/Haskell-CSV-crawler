@@ -5,7 +5,7 @@ import System.Environment
 
 -- |The main function provides access to functionalities of the program
 -- 
---[@create@] creates the database to store csv
+--[@create@] creates the database to store CSVs
 --
 --[@drop@] drops the tables in the database
 --
@@ -16,7 +16,6 @@ import System.Environment
 --[@highest@] prints highest stocks prices of each company in database
 --
 --[@lowest@]  prints lowest stock prices of each company in database
-
 main = do args <- getArgs
           case args of
              ["create"] -> createDB
@@ -30,12 +29,13 @@ main = do args <- getArgs
              ["lowest"] -> printLowest
              _ -> syntaxError
 
--- |Downloads csv of a company passed to it, then parses csv into custom data type. Then it stores parsed data in the database
+-- | Downloads csv of a company passed to it, then parses csv into custom data type. Then it stores parsed data in the database
 saveCompany :: String -> IO ()
 saveCompany company = do csv <- downloadCSV company
                          let rows = csvToRows csv
                          storeRows company rows
 
+-- | Prints actions available from Main
 syntaxError = putStrLn 
   "Usage: StocksMain command [args]\n\
   \\n\
