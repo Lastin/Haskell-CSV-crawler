@@ -20,8 +20,14 @@ connectToMySql =
 createDB :: IO ()
 createDB =
    do conn <- connectToMySql
-      run conn "CREATE TABLE IF NOT EXISTS companies (company_id INTEGER PRIMARY KEY, company_name TEXT UNIQUE NOT NULL)" []
-      run conn "CREATE TABLE IF NOT EXISTS stocks (company_id INTEGER, date DATETIME UNIQUE, high DOUBLE, low DOUBLE, FOREIGN KEY(company_id) REFERENCES companies(company_id))" []
+      run conn "CREATE TABLE IF NOT EXISTS companies (company_id INTEGER PRIMARY KEY AUTO_INCREMENT, company_name VARCHAR(255) UNIQUE NOT NULL)" []
+      run conn (unlines ["CREATE TABLE IF NOT EXISTS stocks (",
+                                                     "company_id INTEGER, ",
+                                                     "date DATETIME, ",
+                                                     "high DOUBLE, ",
+                                                     "low DOUBLE, ",
+                                                     "FOREIGN KEY(company_id) REFERENCES companies(company_id), ",
+                                                     "UNIQUE KEY `uniq_comp_stock` (`company_id`, `date`))"]) []
       commit conn
       disconnect conn
 
@@ -29,7 +35,8 @@ createDB =
 dropTables :: IO ()
 dropTables =
    do conn <- connectToMySql
-      run conn "DROP TABLE IF EXISTS stocks; DROP TABLE IF EXISTS companies" []
+      run conn "DROP TABLE IF EXISTS stocks CASCADE" []
+      run conn "DROP TABLE companies" []
       commit conn
       disconnect conn
 
@@ -38,13 +45,10 @@ storeRows :: String -> [Row] -> IO()
 storeRows _ [] = return ()
 storeRows c rows = 
    do conn <- connectToMySql
-      quickQuery' conn "INSERT OR IGNORE INTO companies (company_name) VALUES (?)" [toSql c]
-      stmt <- prepare conn "SELECT company_id FROM companies WHERE company_name = ?"
-      execute stmt [toSql c]
-      result <- fetchRow stmt
-      case result of
-         Just id -> do stmtStocks <- prepare conn $ "INSERT OR IGNORE INTO stocks (company_id, date, high, low) VALUES (?,?,?,?)"
-                       executeMany stmtStocks $ map (id ++) (map (rowToSql) rows)
+      run conn "INSERT IGNORE INTO companies (company_name) VALUES (?)" [toSql c]
+      c_id <- quickQuery' conn "SELECT company_id FROM companies WHERE company_name = ?" [toSql c]
+      stmtStocks <- prepare conn $ "INSERT IGNORE INTO stocks (company_id, date, high, low) VALUES (?,?,?,?)"
+      executeMany stmtStocks $ map (head c_id ++) (map (rowToSql) rows)
       commit conn
       disconnect conn
 
