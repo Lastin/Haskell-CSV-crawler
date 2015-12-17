@@ -6,7 +6,7 @@ import Network.HTTP.Base
 import Network.URI
 import Data.Maybe
 
--- |Function returns URL csv with stocks prices from Yahoo finance
+-- |Function returns URL to CSV with stocks prices from Yahoo finance
 csvUrl :: String -> String
 csvUrl company = "http://real-chart.finance.yahoo.com/table.csv?s=" ++ company
 
