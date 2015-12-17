@@ -45,7 +45,7 @@ storeRows c rows =
                        executeMany stmtStocks $ map (id ++) (map (rowToSql) rows)
       commit conn
 
--- |Function for printing header, used by [@printHighest@] and [@printLowest@] functions
+-- |Function for printing header, used by @printHighest@ and @printLowest@ functions
 printHeader :: IO ()
 printHeader =
    do putStrLn "     Company     |     Highest    "

@@ -4,11 +4,17 @@ import CSVParser
 import System.Environment
 
 -- |The main function provides access to functionalities of the program
+-- 
 --[@create@] creates the database to store csv
+--
 --[@drop@] drops the tables in the database
+--
 --[@save company@] saves csv of the `company` into database
+--
 --[@update@] updates the stocks of existing companies 
+--
 --[@highest@] prints highest stocks prices of each company in database
+--
 --[@lowest@]  prints lowest stock prices of each company in database
 
 main = do args <- getArgs
