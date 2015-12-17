@@ -13,9 +13,7 @@ csvUrl company = "http://real-chart.finance.yahoo.com/table.csv?s=" ++ company
 -- |Downloads the csv from the url concatenated with company name. Returns csv as string if successful, or as error message otherwise.
 downloadCSV :: String -> IO String
 downloadCSV company = 
-   do print uri
-      print request
-      resp <- simpleHTTP request
+   do resp <- simpleHTTP request
       case resp of
          Left x -> return $ "Error connecting: " ++ show x
          Right r ->
