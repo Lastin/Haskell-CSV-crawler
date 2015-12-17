@@ -1,3 +1,4 @@
+-- |Module provides connectivity functions with MySQL database
 module DBConnector where
 
 import Data.Maybe

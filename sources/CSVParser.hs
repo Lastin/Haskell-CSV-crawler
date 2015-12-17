@@ -1,4 +1,6 @@
+-- |Module provides functions for parsing between strings, sqlValue, Day and Row data type
 module CSVParser where
+
 import Data.List.Split
 import Data.Time
 import Database.HDBC.SqlValue

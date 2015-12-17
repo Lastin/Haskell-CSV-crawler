@@ -1,3 +1,4 @@
+-- |Module performs HTTP requests
 module CSVDownloader where
 
 import Network.HTTP
