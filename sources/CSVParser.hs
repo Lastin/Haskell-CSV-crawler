@@ -20,6 +20,15 @@ formatSqlRow :: [SqlValue] -> String
 formatSqlRow c = a!!0 ++ (replicate (17 - (length $ a!!0)) ' ') ++ "|" ++ a!!1 ++ "\n----------------------------------"
                  where a = map (fromSql :: SqlValue -> String) c
 
+-- |Formats rows fetched from SQL for comparing function
+formatSqlRow' :: [SqlValue] -> String
+formatSqlRow' c = "   " ++ (splitOn " " (a!!0) !! 0) ++ "   |" ++ wrapInSpaces (a!!1) ++ "|" ++ wrapInSpaces (a!!2)
+                  where a = map (fromSql :: SqlValue -> String) c
+
+-- |Adds spaces before and after string to format output
+wrapInSpaces :: String -> String
+wrapInSpaces s = replicate (15 - (length s)) ' ' ++ s ++ replicate 5 ' '
+
 -- |Converts date data format from CSV into Day type
 stringToDate :: String -> Day
 stringToDate s = fromGregorian (toInteger $ t!!0) (t!!1) (t!!2)

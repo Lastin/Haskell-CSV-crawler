@@ -27,6 +27,10 @@ main = do args <- getArgs
                                  mapM_ putStrLn companies
              ["highest"] -> printHighest
              ["lowest"] -> printLowest
+             ["compare", col, comp1, comp2, start, end] -> do
+                   let s = show $ stringToDate start
+                   let e = show $ stringToDate end
+                   compareStocks col comp1 comp2 s e
              _ -> syntaxError
 
 -- | Downloads csv of a company passed to it, then parses csv into custom data type. Then it stores parsed data in the database
@@ -45,4 +49,7 @@ syntaxError = putStrLn
   \save company     Saves csv into the database\n\
   \companies        Prints companies saved in the database\n\
   \highest          Prints highest stock price of each company\n\
-  \lowest           Prints lowest stock price of each company\n"
+  \lowest           Prints lowest stock price of each company\n\
+  \compare column company1 company2 YYYY-mm-dd YYYY-mm-dd\n\
+  \                 Prints stocks of the two companies on same date within given time window\n\
+  \                 example: compare high ibm yhoo 2001-1-10 2001-2-10\n"

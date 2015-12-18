@@ -88,3 +88,19 @@ getCompanies =
       result <- quickQuery' conn "SELECT company_name FROM companies" []
       disconnect conn
       return $ map (fromSql . head) result
+
+-- |Prints stock prices on same date for companies within selected date range
+compareStocks :: String -> String -> String -> String -> String -> IO()
+compareStocks col comp1 comp2 start end =
+   do conn <- connectToMySql
+      let query = "SELECT s1.date, s1."++col++", s2."++col++" FROM (SELECT stocks.company_id, date, "++col++" FROM stocks JOIN (SELECT company_name, company_id FROM companies WHERE company_name = ?) AS comp ON stocks.company_id = comp.company_id WHERE date >= ? AND date <= ?) AS s1 JOIN (SELECT stocks.company_id, date, "++col++" FROM stocks JOIN (SELECT company_name, company_id FROM companies WHERE company_name = ?) AS comp ON stocks.company_id = comp.company_id WHERE date >= ? AND date <= ?) AS s2 ON s1.date = s2.date"
+      stmt <- prepare conn query
+      execute stmt $ map toSql [comp1, start, end, comp2, start, end]
+      result <- fetchAllRows stmt
+      putStrLn $ "      DATE      |" ++ wrapInSpaces comp1 ++ "|" ++ wrapInSpaces comp2
+      putStrLn $ replicate 68 '-'
+      mapM_ (putStrLn . formatSqlRow') result
+      disconnect conn
+      
+      
+      
