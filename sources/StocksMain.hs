@@ -11,11 +11,16 @@ import System.Environment
 --
 --[@save company@] saves csv of the `company` into database
 --
+--[@companies@] prints companies saved in the database
+--
 --[@update@] updates the stocks of existing companies 
 --
 --[@highest@] prints highest stocks prices of each company in database
 --
 --[@lowest@]  prints lowest stock prices of each company in database
+--
+--[@compare@] prints stock prices of two companies on the same date between start and end date
+--
 main = do args <- getArgs
           case args of
              ["create"] -> createDB
